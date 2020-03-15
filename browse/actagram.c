@@ -15,6 +15,55 @@
 
 #include "view.h"
 
+
+int is_valid_day(int day)
+{
+    return day >=1 && day <= 31;
+}
+
+int is_valid_month(int month)
+{
+    return month >=1 && month <= 12;
+}
+
+int is_valid_year(int year)
+{
+    return year >=10 && year <= 99;
+}
+
+int is_valid_date(int date)
+{
+    return is_valid_day(date % 100)
+        && is_valid_month((date / 100) % 100)
+        && is_valid_year((date / 10000) % 100);
+}
+
+int read_holiday_config(int holidays[])
+{
+    FILE *f = fopen("holiday.conf", "r");
+    if (f == NULL) {
+        fprintf(stderr, "[ERROR]: Could not open file holiday.conf.\n");
+        return 0;
+    }
+    printf("\n[DEBUG]: Read holiday.conf file.");
+    printf("<script>\n"
+            "console.log(\"config test\")\n"
+           "\n</script>\n");
+
+    int date;
+    int size = 0;
+    while (fscanf(f, "%d", &date) != EOF) {
+        if (is_valid_date(date)) {
+            holidays[size++] = date;
+        } else {
+            fprintf(stderr, "[ERROR]: %d is not a valid date.\n", date);
+        }
+    }
+    fclose(f);
+    return size;
+}
+
+
 //----------------------------------------------------------------------------------
 // Determine if it's a weekend day or a holiday
 // Returns < 0 for weekday, >= 0 for weekend/holiday.  3 lsbs indicate day of week.
@@ -48,13 +97,21 @@ int IsWeekendString(char * DirString)
     }
 
     // New brunswick holidays thru end of 2021.
+    /*
+     *
     static const int Holidays[] = {190701, 190902, 191225,
                 200101, 200217, 200410, 200518, 200701, 200907, 201225,
                 210101, 210402, 210524, 210701, 210802, 210906, 211227};
+    */
+    int holidays[200];
+    int size = read_holiday_config(holidays);
+    for (int j = 0; j < size; j++) {
+        printf("\nj: %d, %d\n", j, holidays[j]);
+    }
 
-    for (a=0;a<sizeof(Holidays)/sizeof(int);a++){
+    for (a=0;a<size;a++){
         // Check if date is a holday.
-        if (Holidays[a] == daynum) return weekday;
+        if (holidays[a] == daynum) return weekday;
     }
 
     if (weekday == 0 || weekday == 6) return weekday;
@@ -144,6 +201,10 @@ void ShowActagram(int all, int h24)
         if (strcmp(DayDirs.Entries[daynum].Name, "saved") == 0) continue;
         
         memset(bins, 0, sizeof(bins));
+
+        printf("<script>\n"
+            "console.log(\"testing is weekend\")\n"
+           "\n</script>\n");
 
         int isw = IsWeekendString(DayDirs.Entries[daynum].Name);
 
