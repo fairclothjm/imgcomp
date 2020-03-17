@@ -15,48 +15,38 @@
 
 #include "view.h"
 
-
-static int is_valid_day(int day)
-{
-    return day >=1 && day <= 31;
-}
-
-static int is_valid_month(int month)
-{
-    return month >=1 && month <= 12;
-}
-
-static int is_valid_year(int year)
-{
-    return year >=10 && year <= 99;
-}
-
 static int is_valid_date(int date)
 {
-    return is_valid_day(date % 100)
-        && is_valid_month((date / 100) % 100)
-        && is_valid_year((date / 10000) % 100);
+    int d = date%100;
+    int m = (date/100)%100;
+    int y = date/10000;
+
+    return d >= 1 && d <= 31
+        && m >= 1 && m <= 12
+        && y >= 10 && y <= 99;
 }
 
 int read_holiday_config()
 {
     FILE * f = fopen("browse.conf", "r");
     if (f == NULL) {
-        fprintf(stderr, "[ERROR]: Could not open file browse.conf.\n");
+        printf("<script>\n"
+            "console.log(\"[ERROR]: Could not open file browse.conf.\")\n"
+            "\n</script>\n");
         return 0;
     }
-    printf("\n[DEBUG]: Read browse.conf file.");
-    printf("<script>\n"
-            "console.log(\"config test\")\n"
-           "\n</script>\n");
+    printf("<script>console.log(\"[DEBUG]: Read browse.conf file.\")</script>\n");
 
     int date;
     int count = 0;
     while (fscanf(f, "%d", &date) != EOF && count < 200) {
+        printf("<script>console.log(\"[DEBUG]: %d\")</script>\n", date);
         if (is_valid_date(date)) {
+            printf("<script>console.log(\"[DEBUG]: %d\")</script>\n", date);
             Holidays[count++] = date;
         } else {
-            fprintf(stderr, "[ERROR]: %d is not a valid date.\n", date);
+            printf("<script>console.log(\"[ERROR]: %d is not a valid date.\")"
+                    "</script>\n", date);
         }
     }
     fclose(f);
