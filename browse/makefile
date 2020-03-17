@@ -29,7 +29,6 @@ objdir:
 view.cgi: ${OBJECTS_BROWSE} ${OBJECTS_SHARED}
 	${CC} -o view.cgi ${OBJECTS_BROWSE} ${OBJECTS_SHARED}
 	cp view.cgi ../../www
-	cp browse.conf ../../www
 	chmod +s ../../www/view.cgi
 
 tb.cgi:	$(OBJ)/thumb_bat.o 

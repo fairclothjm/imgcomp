@@ -26,30 +26,41 @@ static int is_valid_date(int date)
         && y >= 10 && y <= 99;
 }
 
+//----------------------------------------------------------------------------------
+// Read the browse.conf file to get holidays in the format YYMMDD and
+// store them in the Holidays array.
+//
+// Returns the count stored in the Holidays array.
 int read_holiday_config()
 {
-    FILE * f = fopen("browse.conf", "r");
-    if (f == NULL) {
+
+    printf("<head><meta charset=\"utf-8\"/></head>");
+
+    FILE * file = fopen("browse.conf", "r");
+    if (file == NULL) {
         printf("<script>\n"
             "console.log(\"[ERROR]: Could not open file browse.conf.\")\n"
             "\n</script>\n");
         return 0;
     }
-    printf("<script>console.log(\"[DEBUG]: Read browse.conf file.\")</script>\n");
 
-    int date;
     int count = 0;
-    while (fscanf(f, "%d", &date) != EOF && count < 200) {
-        printf("<script>console.log(\"[DEBUG]: %d\")</script>\n", date);
-        if (is_valid_date(date)) {
-            printf("<script>console.log(\"[DEBUG]: %d\")</script>\n", date);
+    int linenum = 0;
+    char line[200];
+    while (fgets(line, sizeof line, file) != NULL) {
+        int date = atoi(line);
+        linenum++;
+        if (date == 0) {
+            // comment, empty line, or garbage
+            continue;
+        } else if (is_valid_date(date)) {
             Holidays[count++] = date;
         } else {
-            printf("<script>console.log(\"[ERROR]: %d is not a valid date.\")"
-                    "</script>\n", date);
+            printf("<script>console.log(\"[ERROR]: %d is not a valid date, line %d.\")"
+                    "</script>\n", date, linenum);
         }
     }
-    fclose(f);
+    fclose(file);
     return count;
 }
 

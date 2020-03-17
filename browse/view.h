@@ -29,8 +29,6 @@ typedef struct {
 }Dir_t;
 
 //-------------------------------------------------------------------
-// Holidays set by browse_config.c, read from browse.conf
-// TODO: Make me a structure?
 extern int Holidays[200];
 extern int HolidaysLength;
 
