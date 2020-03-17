@@ -54,6 +54,11 @@ int read_holiday_config()
             // comment, empty line, or garbage
             continue;
         } else if (is_valid_date(date)) {
+            if (count > 200) {
+                printf("<script>console.log(\"[ERROR]: browse.conf has too many dates.\")"
+                        "</script>\n");
+                break;
+            }
             Holidays[count++] = date;
         } else {
             printf("<script>console.log(\"[ERROR]: %d is not a valid date, line %d.\")"
