@@ -12,6 +12,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <sys/statvfs.h>
+#include <string.h>
 
 #include "view.h"
 
@@ -243,23 +244,26 @@ void ShowActagram(int all, int h24)
             to=BinsPerHour*24;
         }
         for (a=from;a<=to;a++){
-            char nc = ' ';
-            if (a % BinsPerHour == 0) nc = ':';
-            if (a % (BinsPerHour*6) == 0) nc = '|';
+            char nc[9] = "&#x3000;";
+            if (a % BinsPerHour == 0) strcpy(nc, "&#x250A;");
+            if (a % (BinsPerHour*6) == 0) strcpy(nc, "&#x2502;");
             
-            //if (bins[a] >= 1 && nc == ' ') nc = '.';
-            if (bins[a] >= 5) nc = '-';
-            if (bins[a] >= 12) nc = '1';
-            if (bins[a] >= 40) nc = '2';
-            if (bins[a] >= 100) nc = '#';
+            if (bins[a] >= 5) strcpy(nc, "&#x2581;");
+            if (bins[a] >= 15) strcpy(nc, "&#x2582;");
+            if (bins[a] >= 30) strcpy(nc, "&#x2583;");
+            if (bins[a] >= 45) strcpy(nc, "&#x2584;");
+            if (bins[a] >= 60) strcpy(nc, "&#x2585;");
+            if (bins[a] >= 75) strcpy(nc, "&#x2586;");
+            if (bins[a] >= 90) strcpy(nc, "&#x2587;");
+            if (bins[a] >= 100) strcpy(nc, "&#x2588;");
             
             if (bins[a] >= 1){
                 printf("<a href='view.cgi?%s/%02d/#%s'",DayName,a/BinsPerHour, BinImgName[a]);
                 printf(" onmouseover=\"mmo('%s/%02d/%s')\"",DayName,a/BinsPerHour,BinImgName[a]);
-                printf(">%c", nc);
+                printf(">%s", nc);
                 HrefOpen = 1; // Don't close the href till after the next char, makes it easier to hover over single dot.
             }else{
-                putchar(nc);
+                printf("%s", nc);
                 if (HrefOpen) printf("</a>");
                 HrefOpen = 0;
             }
