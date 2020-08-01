@@ -243,8 +243,6 @@ void ShowActagram(int all, int h24)
             char nc[9] = "&numsp;";
             if (a % BinsPerHour == 0) strcpy(nc, "&#x250A;"); // colon
             if (a % (BinsPerHour*6) == 0) strcpy(nc, "&#x2502;"); // pipe
-            //if (a % BinsPerHour == 0) strcpy(nc, "&numsp;");
-            //if (a % (BinsPerHour*6) == 0) strcpy(nc, "&numsp;");
 
             if (bins[a] >= 1) strcpy(nc, "&#9601;");
             if (bins[a] >= 10) strcpy(nc, "&#9602;");
