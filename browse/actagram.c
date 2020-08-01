@@ -132,7 +132,9 @@ void ShowActagram(int all, int h24)
         "<style type=text/css>\n"
         "  body { font-family: sans-serif; font-size: 20;}\n"
         "  span.wkend {background-color: #E8E8E8}\n"
-        "  pre { font-size: 10;}\n"
+        "  span.whitespace {display:inline-block; width: 8px;}\n"
+        "  span.whitespace-time {display:inline-block; width: 96px;}\n"
+        "  pre { font-size: 8px;}\n"
         "  a {text-decoration: none;}\n"
         "</style>\n");
     
@@ -157,13 +159,8 @@ void ShowActagram(int all, int h24)
     int from = 7*BinsPerHour;
     int to = BinsPerHour*20+1;
 
-
-        //printf("n");
-    
     int ShowLegend = 1;
-    
-    int HrefOpen = 0;
-    
+
     for (;;daynum++){
         int bins[NUMBINS];
         char BinImgName[NUMBINS][24];
@@ -176,12 +173,11 @@ void ShowActagram(int all, int h24)
             // Show legend at the start and end of the actagram view.
             printf("Time:");
             for (int a=from;a<=to;a++){
-                char nc = ' ';
                 if (a % BinsPerHour == 0 && a+5 < to){
                     printf("%02d:00",a/BinsPerHour);
                     a += 5;
+                    printf("<span class=\"whitespace-time\"></span>");
                 }
-                putchar(nc);
             }
             
             if (ShowLegend) puts("<br>");
@@ -207,28 +203,28 @@ void ShowActagram(int all, int h24)
 
 
         if (isw >= 0) printf("<span class=\"wkend\">");
-        
+
         printf("<a href='view.cgi?%s'>%s</a> ",DayName, DayName+2);
         sprintf(DirName, "pix/%s",DayName);
         memset(&HourDirs, 0, sizeof(HourDirs));
-        
+
         CollectDirectory(DirName, NULL, &HourDirs, NULL);
-        
+
         for (h=0;h<HourDirs.NumEntries;h++){
             int a;
             VarList HourPix;
             memset(&HourPix, 0, sizeof(HourPix));
             sprintf(DirName, "pix/%s/%s",DayName, HourDirs.Entries[h].Name);
             CollectDirectory(DirName, &HourPix, NULL, ImageExtensions);
-            
+
             for (a=0;a<HourPix.NumEntries;a++){
                 int minute, binno;
                 char * Name;
                 Name = HourPix.Entries[a].Name;
-                
+
                 minute = (Name[5]-'0')*60*10 + (Name[6]-'0')*60
                        + (Name[7]-'0')*10    + (Name[8]-'0');
-                       
+
                 binno = minute/MinutesPerBin;
                 if (binno >= 0 && binno < NUMBINS){
                     bins[binno] += 1;
@@ -238,44 +234,39 @@ void ShowActagram(int all, int h24)
             free(HourPix.Entries);
         }
         free (HourDirs.Entries);
-        
+
         if (h24){
             from=0;
             to=BinsPerHour*24;
         }
         for (a=from;a<=to;a++){
-            char nc[9] = "&#x3000;";
-            if (a % BinsPerHour == 0) strcpy(nc, "&#x250A;");
-            if (a % (BinsPerHour*6) == 0) strcpy(nc, "&#x2502;");
-            
-            if (bins[a] >= 5) strcpy(nc, "&#x2581;");
-            if (bins[a] >= 15) strcpy(nc, "&#x2582;");
-            if (bins[a] >= 30) strcpy(nc, "&#x2583;");
-            if (bins[a] >= 45) strcpy(nc, "&#x2584;");
-            if (bins[a] >= 60) strcpy(nc, "&#x2585;");
-            if (bins[a] >= 75) strcpy(nc, "&#x2586;");
-            if (bins[a] >= 90) strcpy(nc, "&#x2587;");
-            if (bins[a] >= 100) strcpy(nc, "&#x2588;");
-            
+            char nc[9] = "&numsp;";
+            if (a % BinsPerHour == 0) strcpy(nc, "&#x250A;"); // colon
+            if (a % (BinsPerHour*6) == 0) strcpy(nc, "&#x2502;"); // pipe
+            //if (a % BinsPerHour == 0) strcpy(nc, "&numsp;");
+            //if (a % (BinsPerHour*6) == 0) strcpy(nc, "&numsp;");
+
+            if (bins[a] >= 1) strcpy(nc, "&#9601;");
+            if (bins[a] >= 10) strcpy(nc, "&#9602;");
+            if (bins[a] >= 20) strcpy(nc, "&#9603;");
+            if (bins[a] >= 35) strcpy(nc, "&#9605;");
+            if (bins[a] >= 50) strcpy(nc, "&#9606;");
+            if (bins[a] >= 65) strcpy(nc, "&#9607;");
+
             if (bins[a] >= 1){
                 printf("<a href='view.cgi?%s/%02d/#%s'",DayName,a/BinsPerHour, BinImgName[a]);
                 printf(" onmouseover=\"mmo('%s/%02d/%s')\"",DayName,a/BinsPerHour,BinImgName[a]);
-                printf(">%s", nc);
-                HrefOpen = 1; // Don't close the href till after the next char, makes it easier to hover over single dot.
+                printf(">%s</a>", nc);
             }else{
-                printf("%s", nc);
-                if (HrefOpen) printf("</a>");
-                HrefOpen = 0;
+                printf("<span class=\"whitespace\">%s</span>", nc);
             }
         }
-        if (HrefOpen) printf("</a>");
-        HrefOpen = 0;
         if (isw >= 0) printf("</span>");
         printf("\n");
     }
     free(DayDirs.Entries);
-    
-    
+
+
     // Preview image html code.
     printf("</pre><small id='prevn'></small><br>\n"
            "<a id='prevh' href=""><img id='preview' src='' width=0 height=0></a>\n");
@@ -289,7 +280,7 @@ void ShowActagram(int all, int h24)
            "  if (w > 850){ w=850;h=w/el.naturalWidth*el.naturalHeight;}\n"
            "  el.width=w;el.height=h;\n"
            "}\n");
-           
+
     printf("function mmo(str){\n"
            "el = document.getElementById('preview')\n"
            "   el.src = 'pix/'+str\n"
